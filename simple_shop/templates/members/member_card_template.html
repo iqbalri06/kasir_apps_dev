@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQMart Member Card</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode.js/lib/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+        
+        @page {
+            size: 85.6mm 53.98mm; /* Standard credit card size */
+            margin: 0;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 85.6mm;
+            height: 53.98mm;
+            position: relative;
+            color: white;
+            background-color: white;
+            overflow: hidden;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-radius: 2mm;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        /* Simplified background */
+        .card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a237e; /* Deep indigo */
+            z-index: -2;
+        }
+        /* Top accent bar */
+        .card-accent-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 15mm;
+            background: #0d47a1; /* Dark blue */
+            z-index: -1;
+        }
+        /* Left stripe accent */
+        .card-accent-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3mm;
+            height: 100%;
+            background: #42a5f5; /* Light blue */
+            z-index: -1;
+        }
+        .card-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            padding: 6mm 7mm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Clean header with better alignment */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 3mm;
+        }
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .shop-name {
+            font-size: 16pt;
+            font-weight: 800;
+            line-height: 1;
+            color: white;
+            margin-bottom: 1mm;
+        }
+        .member-tag {
+            background: rgba(66, 165, 245, 0.9); /* #42a5f5 with opacity */
+            padding: 1.5mm 2.5mm;
+            border-radius: 1.5mm;
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            text-align: center;
+            min-width: 14mm;
+        }
+        /* Simple divider line */
+        .divider {
+            height: 0.2mm;
+            background-color: rgba(255,255,255,0.2);
+            margin: 1mm 0 4mm 0;
+        }
+        /* Improved information layout */
+        .member-info {
+            margin-top: 1mm;
+            display: flex;
+            flex-direction: column;
+            gap: 6mm;
+        }
+        .info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5mm;
+        }
+        .info-label {
+            font-size: 6pt;
+            color: #42a5f5; /* Light blue */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .info-value {
+            font-size: 11pt;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 0.3px;
+        }
+        .phone-value {
+            font-size: 9pt;
+            font-weight: 600;
+            color: white;
+        }
+        /* Simplified QR code styling */
+        .qr-container {
+            position: absolute;
+            right: 7mm;
+            bottom: 15mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1mm;
+        }
+        .qr-code {
+            width: 16mm;
+            height: 16mm;
+            background: white;
+            padding: 1mm;
+            border-radius: 1mm;
+            box-shadow: 0 1mm 2mm rgba(0,0,0,0.1);
+        }
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+        }
+        .qr-label {
+            font-size: 5pt;
+            color: #42a5f5; /* Light blue */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            margin-top: 1mm;
+        }
+        /* Clean footer */
+        .card-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8mm;
+            background: #0d47a1; /* Dark blue */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8mm;
+        }
+        .member-id {
+            font-size: 5pt;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 1mm;
+        }
+        .id-label {
+            font-weight: 700;
+        }
+        .id-value {
+            font-weight: 400;
+            color: white;
+        }
+        .website {
+            font-size: 5pt;
+            color: white;
+            text-align: right;
+        }
+        .issue-date {
+            position: absolute;
+            font-size: 5pt;
+            color: rgba(255,255,255,0.6);
+            bottom: 10mm;
+            left: 8mm;
+        }
+        .validity {
+            position: absolute;
+            font-size: 5pt;
+            color: white;
+            font-weight: 700;
+            bottom: 10mm;
+            right: 8mm;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-background"></div>
+        <div class="card-accent-top"></div>
+        <div class="card-accent-left"></div>
+        
+        <div class="card-content">
+            <div class="card-header">
+                <div class="shop-name">IQMart</div>
+                <div class="member-tag">Member</div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="member-info">
+                <div class="info-group">
+                    <div class="info-label">Name</div>
+                    <div class="info-value">{{ member.name }}</div>
+                </div>
+                
+                <div class="info-group">
+                    <div class="info-label">Phone</div>
+                    <div class="phone-value">{{ member.phone }}</div>
+                </div>
+            </div>
+            
+            <div class="qr-container">
+                <div class="qr-code" id="member-qr-code"></div>
+                <div class="qr-label">SCAN ME</div>
+            </div>
+            
+            <div class="issue-date">ISSUED: {{ member.created_at|date:"d/m/Y" }}</div>
+            <div class="validity">VALID PERMANENTLY</div>
+        </div>
+        
+        <div class="card-footer">
+            <div class="member-id">
+                <span class="id-label">ID:</span>
+                <span class="id-value">{{ member_id }}</span>
+            </div>
+            <div class="website">www.iqmart.id</div>
+        </div>
+    </div>
+
+    <script>
+        // Generate QR code when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get member data from template
+            const memberId = '{{ member_id }}';
+            const memberPhone = '{{ member.phone }}';
+            
+            // Generate QR code with member ID and phone
+            const qrContent = `ID:${memberId}|PHONE:${memberPhone}`;
+            const qrCodeElement = document.getElementById('member-qr-code');
+            
+            // Create QR code
+            if (window.QRCode) {
+                new QRCode(qrCodeElement, {
+                    text: qrContent,
+                    width: 70,
+                    height: 70,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        });
+        
+        // Auto-print dialog
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

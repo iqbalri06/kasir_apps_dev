@@ -1,0 +1,623 @@
+{% extends 'base.html' %}
+{% load currency %}
+{% load humanize %}
+
+{% block title %}Dashboard - Simple Shop{% endblock %}
+
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block header_actions %}
+<!-- Empty header actions since we're moving the greeting to the clock card -->
+{% endblock %}
+
+{% block content %}
+<!-- Combined Clock Card with Greeting -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm time-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="clock-analog">
+                            <canvas id="analogClock" width="100" height="100"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-column">
+                            <div class="digital-time mb-1">
+                                <span id="timeIcon" class="me-2"></span>
+                                <span id="digitalClock" class="fw-bold"></span>
+                            </div>
+                            <div class="date">
+                                <i class="bi bi-calendar3 me-2"></i>
+                                <span id="indonesianDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="user-greeting">
+                            <div class="greeting-content">
+                                <div class="greeting-text">
+                                    <h4 id="greetingMessage" class="mb-1"></h4>
+                                    <p class="text-muted mb-0">{{ user.get_full_name|default:user.username }}</p>
+                                </div>
+                                <div class="greeting-icon" id="greetingIcon"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <!-- Today's Sales -->
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-primary bg-opacity-10">
+                    <i class="bi bi-cash text-primary"></i>
+                </div>
+                <h6 class="stat-label">Penjualan Hari Ini</h6>
+                <h4 class="stat-value">Rp {{ today_sales|floatformat:0|intcomma }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Today's Transactions -->
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-success bg-opacity-10">
+                    <i class="bi bi-receipt text-success"></i>
+                </div>
+                <h6 class="stat-label">Transaksi Hari Ini</h6>
+                <h4 class="stat-value">{{ transactions_count }}</h4>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Average Transaction -->
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-info bg-opacity-10">
+                    <i class="bi bi-graph-up text-info"></i>
+                </div>
+                <h6 class="stat-label">Rata-rata Transaksi</h6>
+                <h4 class="stat-value">Rp {{ average_transaction|floatformat:0|intcomma }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Row -->
+<div class="row g-4 mb-4">
+    <!-- New Transaction Card -->
+    <div class="col-md-4">
+        <div class="card action-card border-0 shadow-sm h-100">
+            <a href="{% url 'simple_shop:cashier' %}" class="text-decoration-none">
+                <div class="card-body">
+                    <div class="action-icon bg-primary bg-opacity-10">
+                        <i class="bi bi-cart-plus text-primary"></i>
+                    </div>
+                    <h5 class="action-title text-primary">Transaksi Baru</h5>
+                    <p class="action-description">Mulai transaksi penjualan baru</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Member Card -->
+    <div class="col-md-4">
+        <div class="card action-card border-0 shadow-sm h-100">
+            <a href="{% url 'simple_shop:member_search_page' %}" class="text-decoration-none">
+                <div class="card-body">
+                    <div class="action-icon bg-success bg-opacity-10">
+                        <i class="bi bi-person-vcard text-success"></i>
+                    </div>
+                    <h5 class="action-title text-success">Cari Member</h5>
+                    <p class="action-description">Cek data dan poin member</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Daily Report Card -->
+    <div class="col-md-4">
+        <div class="card action-card border-0 shadow-sm h-100">
+            <a href="{% url 'simple_shop:export_sales' %}?report_type=daily" class="text-decoration-none">
+                <div class="card-body">
+                    <div class="action-icon bg-info bg-opacity-10">
+                        <i class="bi bi-file-earmark-spreadsheet text-info"></i>
+                    </div>
+                    <h5 class="action-title text-info">Download Laporan</h5>
+                    <p class="action-description">Download laporan penjualan hari ini</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions Card -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0 fw-bold">Data Transaksi</h5>
+            <div class="d-flex gap-2">
+                <div class="input-group search-input-group">
+                    <input type="text" 
+                           id="searchInput" 
+                           name="search" 
+                           class="form-control" 
+                           placeholder="Cari transaksi..." 
+                           value="{{ search_query }}"
+                           autocomplete="off">
+                    <span class="input-group-text bg-transparent">
+                        <i class="bi bi-search"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>No. Transaksi</th>
+                        <th>Tanggal</th>
+                        <th>Customer</th>
+                        <th>Kasir</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-center" style="min-width: 100px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="salesTableBody">
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.transaction_number }}</td>
+                        <td>{{ sale.created_at|date:"d M Y H:i" }}</td>
+                        <td>{{ sale.member.name|default:"Non Member" }}</td>
+                        <td>{{ sale.user.get_full_name|default:sale.user.username }}</td>
+                        <td class="text-end">{{ sale.total_price|rupiah }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'simple_shop:sale_detail' sale.id %}" class="btn btn-sm btn-outline-primary" title="Lihat Detail">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'simple_shop:print_receipt' sale.id %}" class="btn btn-sm btn-outline-success" title="Download Struk">
+                                <i class="bi bi-receipt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                {% if search_query %}
+                                    Tidak ada transaksi yang sesuai dengan pencarian
+                                {% else %}
+                                    Belum ada transaksi
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            {% if sales.has_other_pages %}
+            <nav class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if sales.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">« Pertama</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sales.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Sebelumnya</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in sales.paginator.page_range %}
+                        {% if sales.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > sales.number|add:'-3' and num < sales.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if sales.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sales.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Selanjutnya</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sales.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Terakhir »</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Date and time utility functions
+    const monthsIndo = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    
+    const daysIndo = [
+        'Minggu', 'Senin', 'Selasa', 'Rabu',
+        'Kamis', 'Jumat', 'Sabtu'
+    ];
+
+    // Set greeting based on time of day
+    function setGreeting() {
+        const now = new Date();
+        const hours = now.getHours();
+        const greeting = document.getElementById('greetingMessage');
+        const greetingIcon = document.getElementById('greetingIcon');
+        
+        let message = '';
+        let icon = '';
+        
+        if (hours >= 0 && hours < 12) {
+            message = 'Selamat Pagi';
+            icon = '<i class="bi bi-brightness-alt-high text-warning"></i>';
+        } else if (hours >= 12 && hours < 15) {
+            message = 'Selamat Siang';
+            icon = '<i class="bi bi-sun text-warning"></i>';
+        } else if (hours >= 15 && hours < 18) {
+            message = 'Selamat Sore';
+            icon = '<i class="bi bi-sunset text-warning"></i>';
+        } else {
+            message = 'Selamat Malam';
+            icon = '<i class="bi bi-moon-stars text-info"></i>';
+        }
+        
+        greeting.textContent = message + ',';
+        greetingIcon.innerHTML = icon;
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        
+        // Update digital clock
+        const digitalClock = document.getElementById('digitalClock');
+        digitalClock.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Update time icon
+        const timeIcon = document.getElementById('timeIcon');
+        if (hours >= 0 && hours < 11) {
+            timeIcon.innerHTML = '<i class="bi bi-sunrise text-warning"></i>';
+        } else if (hours >= 11 && hours < 15) {
+            timeIcon.innerHTML = '<i class="bi bi-sun text-warning"></i>';
+        } else if (hours >= 15 && hours < 18) {
+            timeIcon.innerHTML = '<i class="bi bi-sunset text-warning"></i>';
+        } else {
+            timeIcon.innerHTML = '<i class="bi bi-moon-stars text-info"></i>';
+        }
+        
+        // Update analog clock
+        const canvas = document.getElementById('analogClock');
+        const ctx = canvas.getContext('2d');
+        const radius = canvas.height / 2;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw clock face
+        ctx.beginPath();
+        ctx.arc(radius, radius, radius - 4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fill();
+        ctx.strokeStyle = '#4361ee';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Draw hour markers
+        for (let i = 0; i < 12; i++) {
+            const angle = (i * 30) * Math.PI / 180;
+            const markerRadius = radius - 10;
+            const x1 = radius + Math.sin(angle) * markerRadius;
+            const y1 = radius - Math.cos(angle) * markerRadius;
+            const x2 = radius + Math.sin(angle) * (markerRadius - 5);
+            const y2 = radius - Math.cos(angle) * (markerRadius - 5);
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = '#4361ee';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // Draw clock hands
+        const secondAngle = (seconds * 6) * Math.PI / 180;
+        const minuteAngle = ((minutes + seconds/60) * 6) * Math.PI / 180;
+        const hourAngle = ((hours % 12 + minutes/60) * 30) * Math.PI / 180;
+        
+        // Hour hand
+        drawHand(ctx, hourAngle, radius * 0.5, 4, '#0d6efd');
+        // Minute hand
+        drawHand(ctx, minuteAngle, radius * 0.7, 3, '#0d6efd');
+        // Second hand
+        drawHand(ctx, secondAngle, radius * 0.85, 2, '#dc3545');
+        
+        // Draw center dot
+        ctx.beginPath();
+        ctx.arc(radius, radius, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#4361ee';
+        ctx.fill();
+        
+        // Update Indonesian date
+        const day = daysIndo[now.getDay()];
+        const date = now.getDate();
+        const month = monthsIndo[now.getMonth()];
+        const year = now.getFullYear();
+        document.getElementById('indonesianDate').textContent = 
+            `${day}, ${date} ${month} ${year}`;
+    }
+
+    function drawHand(ctx, angle, length, width, color) {
+        const centerX = ctx.canvas.width / 2;
+        const centerY = ctx.canvas.height / 2;
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = color;
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(
+            centerX + Math.sin(angle) * length,
+            centerY - Math.cos(angle) * length
+        );
+        ctx.stroke();
+    }
+
+    // Run once on page load
+    setGreeting();
+    updateClock();
+    
+    // Update clock every second
+    setInterval(updateClock, 1000);
+    
+    // Search functionality
+    let searchTimeout;
+    
+    function performSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const currentUrl = new URL(window.location.href);
+        
+        // Update URL with search parameter
+        if (searchInput.value) {
+            currentUrl.searchParams.set('search', searchInput.value);
+        } else {
+            currentUrl.searchParams.delete('search');
+        }
+        
+        // Update URL without reloading page
+        window.history.replaceState({}, '', currentUrl);
+
+        // Fetch the page with the search parameter
+        fetch(currentUrl)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Update table body
+                const newTableBody = doc.getElementById('salesTableBody');
+                if (newTableBody) {
+                    document.getElementById('salesTableBody').innerHTML = newTableBody.innerHTML;
+                }
+                
+                // Update pagination if it exists
+                const newPagination = doc.querySelector('.pagination');
+                const currentPagination = document.querySelector('.pagination');
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        
+        // Setup search input handler with debounce
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 300);
+        });
+    });
+</script>
+
+<style>
+    /* Enhanced clock and dashboard styling */
+    .time-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .clock-analog {
+        width: 100px;
+        height: 100px;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        padding: 5px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .digital-time {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    .date {
+        font-size: 0.95rem;
+        color: #6c757d;
+    }
+    
+    /* User greeting styling in clock card */
+    .user-greeting {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-left: 1rem;
+        position: relative;
+    }
+    
+    .user-greeting:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 10%;
+        height: 80%;
+        width: 1px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .greeting-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .greeting-text h4 {
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+    }
+    
+    .greeting-icon {
+        font-size: 2rem;
+        margin-left: 1rem;
+    }
+
+    /* Stat cards styling */
+    .stat-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Action cards styling */
+    .action-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-description {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    /* Search input styling */
+    .search-input-group {
+        width: 250px;
+    }
+    
+    .search-input-group .form-control {
+        border-radius: 8px 0 0 8px;
+        border-right: none;
+    }
+    
+    .search-input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+    
+    .search-input-group .input-group-text {
+        background-color: white;
+        border-radius: 0 8px 8px 0;
+        border-left: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .user-greeting:before {
+            display: none;
+        }
+        
+        .user-greeting {
+            padding: 1rem 0 0 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+        
+        .search-input-group {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

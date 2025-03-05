@@ -1,0 +1,945 @@
+{% extends 'base.html' %}
+
+{% block title %}Tambah User - Simple Shop{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row m-0">
+        <div class="col-12 p-0">
+            <div class="card border-0 shadow-lg rounded-0">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="bi bi-person-plus me-2"></i>Tambah User Baru
+                            </h5>
+                            <button onclick="history.back()" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-arrow-left me-1"></i>Kembali
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 p-lg-5">
+                    <div class="container-fluid px-0">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3 mb-md-0">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-info-circle-fill text-primary me-2 fs-5" id="step-icon"></i>
+                                        <h5 class="fw-bold mb-0" id="step-title">Informasi User</h5>
+                                    </div>
+                                    <p class="text-muted" id="step-description">Mohon isi data user dengan lengkap. Username dan email harus unik.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="progress-card">
+                                    <div class="progress">
+                                        <div class="progress-step active" data-step="1">
+                                            <div class="progress-marker">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                            <div class="progress-text">Identitas</div>
+                                        </div>
+                                        <div class="progress-step active" data-step="2">
+                                            <div class="progress-marker">
+                                                <i class="bi bi-shield"></i>
+                                            </div>
+                                            <div class="progress-text">Akses</div>
+                                        </div>
+                                        <div class="progress-step active" data-step="3">
+                                            <div class="progress-marker">
+                                                <i class="bi bi-lock"></i>
+                                            </div>
+                                            <div class="progress-text">Keamanan</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <div>{{ error }}</div>
+                            </div>
+                            {% endfor %}
+
+                            <!-- User Identity Section -->
+                            <div class="form-section mb-4 primary-border-left" id="step1">
+                                <div class="form-section-header">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="bi bi-person-badge me-2"></i>Identitas User
+                                    </h6>
+                                </div>
+                                
+                                <div class="row g-4">
+                                    <!-- First Name & Last Name -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_first_name" class="form-label">Nama Depan</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-person text-primary"></i>
+                                                </span>
+                                                <input type="text" 
+                                                       class="form-control form-control-lg {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                                       id="id_first_name" 
+                                                       name="first_name" 
+                                                       placeholder="Nama Depan"
+                                                       value="{{ form.first_name.value|default:'' }}"
+                                                       required>
+                                                {% if form.first_name.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.first_name.errors|join:", " }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_last_name" class="form-label">Nama Belakang</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-person-fill text-primary"></i>
+                                                </span>
+                                                <input type="text" 
+                                                       class="form-control form-control-lg {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                                       id="id_last_name" 
+                                                       name="last_name" 
+                                                       placeholder="Nama Belakang"
+                                                       value="{{ form.last_name.value|default:'' }}"
+                                                       required>
+                                                {% if form.last_name.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.last_name.errors|join:", " }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label for="id_email" class="form-label">Email</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-envelope text-primary"></i>
+                                                </span>
+                                                <input type="email" 
+                                                       class="form-control form-control-lg {% if form.email.errors %}is-invalid{% endif %}" 
+                                                       id="id_email" 
+                                                       name="email" 
+                                                       placeholder="contoh@email.com"
+                                                       value="{{ form.email.value|default:'' }}"
+                                                       required>
+                                                {% if form.email.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.email.errors|join:", " }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>Email digunakan untuk notifikasi dan reset password
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary btn-lg next-step" data-step="1">
+                                        Selanjutnya <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Access Section -->
+                            <div class="form-section mb-4 primary-border-left d-none" id="step2">
+                                <div class="form-section-header">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="bi bi-key me-2"></i>Informasi Akses
+                                    </h6>
+                                </div>
+                                
+                                <div class="row g-4">
+                                    <!-- Username -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_username" class="form-label">Username</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-person-badge text-primary"></i>
+                                                </span>
+                                                <input type="text" 
+                                                       class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}" 
+                                                       id="id_username" 
+                                                       name="username" 
+                                                       placeholder="Username"
+                                                       value="{{ form.username.value|default:'' }}"
+                                                       required>
+                                                {% if form.username.errors %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.username.errors|join:", " }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>Username digunakan untuk login
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Role -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_role" class="form-label">Role</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-shield text-primary"></i>
+                                                </span>
+                                                <select class="form-select form-select-lg {% if form.role.errors %}is-invalid{% endif %}" 
+                                                        id="id_role" 
+                                                        name="role" 
+                                                        required>
+                                                    <option value="">Pilih Role</option>
+                                                    {% for role in roles %}
+                                                        <option value="{{ role.id }}" 
+                                                            {% if form.role.value|stringformat:"s" == role.id|stringformat:"s" %}selected{% endif %}>
+                                                            {{ role.name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            {% if form.role.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.role.errors|join:", " }}
+                                            </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>Pilih role yang sesuai dengan hak akses user
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-light btn-lg prev-step" data-step="2">
+                                        <i class="bi bi-arrow-left me-2"></i> Sebelumnya
+                                    </button>
+                                    <button type="button" class="btn btn-primary btn-lg next-step" data-step="2">
+                                        Selanjutnya <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Security Section -->
+                            <div class="form-section mb-4 primary-border-left d-none" id="step3">
+                                <div class="form-section-header">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="bi bi-lock me-2"></i>Keamanan
+                                    </h6>
+                                </div>
+                                
+                                <div class="row g-4">
+                                    <!-- Password -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_password1" class="form-label">Password</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-lock text-primary"></i>
+                                                </span>
+                                                <input type="password" 
+                                                       class="form-control form-control-lg {% if form.password1.errors %}is-invalid{% endif %}" 
+                                                       id="id_password1" 
+                                                       name="password1" 
+                                                       placeholder="Password"
+                                                       required>
+                                                <button class="btn btn-outline-secondary toggle-password" 
+                                                        type="button" 
+                                                        data-target="id_password1">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            {% if form.password1.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.password1.errors|join:", " }}
+                                            </div>
+                                            {% endif %}
+                                            <div class="form-text small">
+                                                {{ form.password1.help_text|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="id_password2" class="form-label">Konfirmasi Password</label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-lock-fill text-primary"></i>
+                                                </span>
+                                                <input type="password" 
+                                                       class="form-control form-control-lg {% if form.password2.errors %}is-invalid{% endif %}" 
+                                                       id="id_password2" 
+                                                       name="password2" 
+                                                       placeholder="Konfirmasi Password"
+                                                       required>
+                                                <button class="btn btn-outline-secondary toggle-password" 
+                                                        type="button" 
+                                                        data-target="id_password2">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                            {% if form.password2.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.password2.errors|join:", " }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-light btn-lg prev-step" data-step="3">
+                                        <i class="bi bi-arrow-left me-2"></i> Sebelumnya
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-check-lg me-2"></i>Selesai
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+    
+    // Add toggle password functionality
+    document.querySelectorAll('.toggle-password').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    });
+    
+    // Email validation
+    const emailInput = document.getElementById('id_email');
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            validateEmail(this);
+        });
+    }
+    
+    function validateEmail(input) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(input.value);
+        
+        if (input.value === '') {
+            input.classList.remove('is-valid', 'is-invalid');
+        } else if (isValid) {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        }
+    }
+})()
+
+// Updated Multi-step form handling
+document.addEventListener('DOMContentLoaded', function() {
+    let currentStep = 1;
+    const totalSteps = 3;
+    const progress = document.querySelector('.progress');
+    
+    // Add step information
+    const stepInfo = {
+        1: {
+            icon: 'bi-person-badge',
+            title: 'Informasi User',
+            description: 'Mohon isi data user dengan lengkap. Username dan email harus unik.',
+            color: 'text-primary'  // Changed from text-accent
+        },
+        2: {
+            icon: 'bi-shield-check',
+            title: 'Informasi Akses',
+            description: 'Tentukan username dan role untuk mengatur hak akses user.',
+            color: 'text-primary'
+        },
+        3: {
+            icon: 'bi-shield-lock',
+            title: 'Keamanan Akun',
+            description: 'Buat password yang kuat untuk mengamankan akun.',
+            color: 'text-primary'  // Changed from text-success
+        }
+    };
+
+    function updateStepInfo(step) {
+        const info = stepInfo[step];
+        const icon = document.getElementById('step-icon');
+        const title = document.getElementById('step-title');
+        const description = document.getElementById('step-description');
+        
+        // Remove previous color classes
+        icon.className = 'bi me-2 fs-5';
+        // Add new classes
+        icon.classList.add(info.icon, info.color);
+        
+        title.textContent = info.title;
+        description.textContent = info.description;
+    }
+
+    function updateProgress(step) {
+        // Update progress bar
+        progress.setAttribute('data-current-step', step);
+        
+        // Update steps
+        document.querySelectorAll('.progress-step').forEach((stepEl, index) => {
+            const stepNum = index + 1;
+            
+            if (stepNum < step) {
+                stepEl.classList.add('completed');
+                stepEl.classList.add('active');
+            } else if (stepNum === step) {
+                stepEl.classList.add('active');
+                stepEl.classList.remove('completed');
+            } else {
+                stepEl.classList.remove('active', 'completed');
+            }
+        });
+    }
+    
+    function showStep(step) {
+        // Hide all steps
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.add('d-none');
+        });
+        
+        // Show current step
+        document.getElementById(`step${step}`).classList.remove('d-none');
+        
+        // Update progress
+        updateProgress(step);
+        
+        // Update step info
+        updateStepInfo(step);
+        
+        // Scroll to top of form
+        document.querySelector('.card-body').scrollTop = 0;
+    }
+    
+    function validateStep(step) {
+        let isValid = true;
+        const currentSection = document.getElementById(`step${step}`);
+        
+        // Validate required fields in current section
+        currentSection.querySelectorAll('[required]').forEach(input => {
+            if (!input.value) {
+                isValid = false;
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        return isValid;
+    }
+    
+    // Next button click handler
+    document.querySelectorAll('.next-step').forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStepNum = parseInt(this.dataset.step);
+            
+            if (validateStep(currentStepNum)) {
+                currentStep = currentStepNum + 1;
+                showStep(currentStep);
+            }
+        });
+    });
+    
+    // Previous button click handler
+    document.querySelectorAll('.prev-step').forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStepNum = parseInt(this.dataset.step);
+            currentStep = currentStepNum - 1;
+            showStep(currentStep);
+        });
+    });
+    
+    // Initialize form
+    showStep(1);
+});
+</script>
+{% endblock %}
+
+<style>
+:root {
+    --primary-color: #0d6efd;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+body {
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.container-fluid {
+    max-width: 100%;
+}
+
+.card {
+    min-height: 100vh;
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.input-group-text {
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group-text i {
+    font-size: 1.2rem;
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+.form-control:focus,
+.form-select:focus,
+.input-group:focus-within {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.form-floating label {
+    color: #6c757d;
+}
+
+.btn {
+    padding: 0.6rem 1.5rem;
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+}
+
+.btn-light {
+    background-color: var(--light-color);
+    border-color: var(--light-color);
+}
+
+.btn-light:hover {
+    background-color: #e2e6ea;
+    border-color: #dae0e5;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.form-section {
+    padding: 1.5rem;
+    background-color: var(--light-color);
+    border-radius: 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.form-section:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.primary-border-left {
+    border-left: 4px solid var(--primary-color);
+}
+
+.form-section-header {
+    margin-bottom: 1rem;
+}
+
+/* Updated Progress Card and Steps styles */
+.progress-card {
+    padding: 2rem 1rem;
+    background-color: var(--light-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: visible;
+}
+
+.progress {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+    height: auto;
+    background: none;
+    padding: 0;
+    margin: 0 60px;
+    overflow: visible;
+}
+
+/* Base track line */
+.progress::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    z-index: 1;
+    width: calc(100% - 80px); /* Menyesuaikan lebar track dengan jarak antar marker */
+    margin: 0 20px; /* Memberikan margin agar sejajar dengan marker */
+}
+
+/* Active track line */
+.progress::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    height: 4px;
+    background-color: var(--primary-color);
+    border-radius: 4px;
+    z-index: 1;
+    transition: width 0.4s ease;
+    max-width: calc(100% - 80px); /* Membatasi lebar maksimum */
+}
+
+/* Adjust progress width calculations */
+.progress[data-current-step="1"]::after {
+    width: 0;
+}
+
+.progress[data-current-step="2"]::after {
+    width: calc(50% - 40px); /* Menyesuaikan lebar untuk step 2 */
+}
+
+.progress[data-current-step="3"]::after {
+    width: calc(100% - 80px); /* Menyesuaikan lebar untuk step 3 */
+}
+
+@media (max-width: 768px) {
+    .progress::before {
+        width: calc(100% - 60px);
+        margin: 0 15px;
+    }
+    
+    .progress::after {
+        left: 30px;
+        max-width: calc(100% - 60px);
+    }
+    
+    .progress[data-current-step="2"]::after {
+        width: calc(50% - 30px);
+    }
+    
+    .progress[data-current-step="3"]::after {
+        width: calc(100% - 60px);
+    }
+}
+
+/* Updated Progress Marker styles */
+.progress-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 3px solid #e9ecef;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 3;
+    overflow: visible;
+    transform-origin: center center;
+    flex-shrink: 0;
+    box-sizing: content-box;
+}
+
+.progress-marker i {
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Active state styling */
+.progress-step.active .progress-marker {
+    border: 3px solid var(--primary-color);
+    background-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.progress-step.active .progress-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.progress-step.completed .progress-marker {
+    background-color: var(--primary-color);
+    border: 3px solid var(--primary-color);
+    color: white;
+}
+
+.progress-step.completed .progress-marker i {
+    color: #fff;
+}
+
+.progress-step.completed .progress-marker i,
+.progress-step.active .progress-marker i {
+    transform: scale(1);
+}
+
+/* Remove any potential interference */
+.progress::before,
+.progress::after {
+    pointer-events: none;
+}
+
+/* Improve mobile styling */
+@media (max-width: 768px) {
+    .progress-marker {
+        width: 32px;
+        height: 32px;
+        border-width: 2.5px;
+    }
+    
+    .progress-marker i {
+        font-size: 0.875rem;
+    }
+    
+    .progress-step.active .progress-marker {
+        border-width: 2.5px;
+    }
+    
+    .progress-step.completed .progress-marker {
+        border-width: 2.5px;
+    }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Active state styling */
+.progress-step.active .progress-marker {
+    border-color: var(--primary-color);
+    background-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.progress-step.active .progress-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.progress-step.completed .progress-marker {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Progress line width states */
+.progress[data-current-step="1"]::after {
+    width: 0%;
+}
+
+.progress[data-current-step="2"]::after {
+    width: 50%;
+}
+
+.progress[data-current-step="3"]::after {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .progress {
+        padding: 0 20px;
+    }
+    
+    .progress::before,
+    .progress::after {
+        left: 30px;
+        right: 30px;
+    }
+    
+    .progress-marker {
+        width: 32px;
+        height: 32px;
+        border-width: 3px;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .progress-text {
+        font-size: 0.75rem;
+    }
+    
+    .progress-marker {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Add/modify these styles */
+.form-section {
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+}
+
+.form-section.d-none {
+    opacity: 0;
+    display: none !important;
+}
+
+.progress-step {
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .progress-marker {
+    transform: scale(1.1);
+}
+
+.next-step:hover, 
+.prev-step:hover {
+    transform: translateX(0);
+}
+
+.next-step:hover {
+    transform: translateX(5px);
+}
+
+.prev-step:hover {
+    transform: translateX(-5px);
+}
+
+/* Update progress step styling */
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+    padding: 0 10px;
+}
+
+/* Update progress text styling */
+.progress-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .progress-text {
+        font-size: 0.75rem;
+        margin-top: 6px;
+    }
+    
+    .progress-step {
+        padding: 0 5px;
+    }
+}
+</style>
+{% endblock %}

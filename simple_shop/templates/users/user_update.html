@@ -1,0 +1,702 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if request.user == user %}
+        Profil Saya - Simple Shop
+    {% else %}
+        Edit Pengguna - Simple Shop
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-light py-2 px-3 rounded-3 shadow-sm">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Profile</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-0 px-md-3">
+    <!-- Page header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 px-3 px-md-0">
+        <div class="mb-3 mb-md-0">
+            <h4 class="mb-1 fw-bold {% if request.user == user %}text-primary{% else %}text-primary{% endif %}">
+                {% if request.user == user %}
+                    <i class="bi bi-person-circle me-2"></i>Profil Saya
+                {% else %}
+                    <i class="bi bi-person-gear me-2"></i>Edit Pengguna
+                {% endif %}
+            </h4>
+            <p class="text-muted mb-0">
+                {% if is_admin_editing_other %}
+                    Perbarui status pengguna
+                {% elif request.user == user %}
+                    Perbarui informasi dan pengaturan akun Anda
+                {% else %}
+                    Perbarui informasi dan pengaturan pengguna
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <button onclick="history.back()" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </button>
+        </div>
+    </div>
+    
+    {% if is_admin_editing_other %}
+    <div class="alert alert-info mb-4 mx-3 mx-md-0">
+        <div class="d-flex">
+            <div class="me-3">
+                <i class="bi bi-info-circle-fill fs-4"></i>
+            </div>
+            <div>
+                <h5 class="alert-heading">Informasi</h5>
+                <p class="mb-0">Sebagai admin, Anda hanya dapat mengubah status aktif/nonaktif untuk pengguna lain.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- User Profile Header - Only shown for self-edit -->
+    {% if request.user == user %}
+    <div class="card border-0 shadow-lg rounded-4 mb-4 mx-3 mx-md-0 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="row g-0">
+                <div class="col-md-4 bg-primary text-white d-flex flex-column align-items-center justify-content-center p-4 p-md-5" style="background: linear-gradient(135deg, #4361ee, #3a7bd5);">
+                    <div class="profile-avatar-large mb-3 bg-white text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto">
+                        <span class="fw-bold display-4">{{ user.username.0|upper }}</span>
+                    </div>
+                    <h4 class="text-white text-center mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="mb-1 text-white-50 text-center">
+                        <i class="bi bi-envelope me-1"></i>{{ user.email|default:"No email" }}
+                    </p>
+                    <div class="mt-2">
+                        <span class="badge bg-white text-primary px-3 py-2 rounded-pill">
+                            <i class="bi bi-person-badge me-1"></i>{{ user.role.name|default:"User" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-8 p-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="info-stat">
+                                <div class="info-label">Username</div>
+                                <div class="info-value">@{{ user.username }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-stat">
+                                <div class="info-label">Status</div>
+                                <div class="info-value">
+                                    {% if user.is_active %}
+                                    <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i>Aktif</span>
+                                    {% else %}
+                                    <span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i>Tidak Aktif</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-stat">
+                                <div class="info-label">Bergabung Pada</div>
+                                <div class="info-value"><i class="bi bi-calendar-date me-1"></i>{{ user.date_joined|date:"d M Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-stat">
+                                <div class="info-label">Login Terakhir</div>
+                                <div class="info-value">
+                                    {% if user.last_login %}
+                                    <i class="bi bi-clock-history me-1"></i>{{ user.last_login|date:"d M Y H:i" }}
+                                    {% else %}
+                                    <span class="text-muted">Tidak ada data</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Form with error alerts -->
+    <form method="post" class="needs-validation">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-4 mx-3 mx-md-0">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="alert-heading">Error</h5>
+                    <ul class="mb-0 ps-3">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- User Information Card - Full width with improved spacing -->
+        <div class="card border-0 shadow-lg rounded-4 mb-4 mx-3 mx-md-0">
+            <div class="card-header bg-gradient-primary text-white py-3 px-4 border-0">
+                <div class="d-flex align-items-center">
+                    <div class="icon-container me-3">
+                        <i class="bi bi-person-vcard fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Informasi Profil</h5>
+                        <p class="mb-0 opacity-75 small">Data personal Anda</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4 p-lg-5">
+                <!-- Username & Role Row -->
+                <div class="row g-4 mb-4">
+                    <!-- Username -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-person me-1 text-primary"></i>Username
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                {{ form.username }}
+                            </div>
+                            {% if form.username.errors %}
+                            <div class="error-feedback">
+                                {{ form.username.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint">Username dapat diubah, pastikan username belum digunakan</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Role -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.role.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-shield me-1 text-primary"></i>Role
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                {{ form.role }}
+                            </div>
+                            {% if form.role.errors %}
+                            <div class="error-feedback">
+                                {{ form.role.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint">Pilih role yang sesuai dengan hak akses user</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Name Row -->
+                <div class="row g-4 mb-4">
+                    <!-- First Name -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-person-lines-fill me-1 text-primary"></i>Nama Depan
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-type"></i>
+                                </span>
+                                {{ form.first_name }}
+                            </div>
+                            {% if form.first_name.errors %}
+                            <div class="error-feedback">
+                                {{ form.first_name.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Last Name -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-person-lines-fill me-1 text-primary"></i>Nama Belakang
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-type"></i>
+                                </span>
+                                {{ form.last_name }}
+                            </div>
+                            {% if form.last_name.errors %}
+                            <div class="error-feedback">
+                                {{ form.last_name.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Email Row -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-envelope-fill me-1 text-primary"></i>Email
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                {{ form.email }}
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="error-feedback">
+                                {{ form.email.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint">Email digunakan untuk notifikasi dan reset password</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Row - Only show for admin editing others -->
+                {% if is_admin_editing_other %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group status-switch">
+                            <div class="d-flex">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    <span class="fw-medium">
+                                        <i class="bi bi-toggle-on me-1 text-primary"></i>Status Akun
+                                    </span>
+                                    <span class="active-status ms-2">
+                                        {% if user.is_active %}
+                                        <span class="badge bg-success">Aktif</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Nonaktif</span>
+                                        {% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                            <div class="error-feedback">
+                                {{ form.is_active.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint">User nonaktif tidak dapat login ke sistem</div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Hidden field for is_active when not admin -->
+                {{ form.is_active.as_hidden }}
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Password Change Card - Full width -->
+        {% if not is_admin_editing_other %}
+        <div class="card border-0 shadow-lg rounded-4 mb-4 mx-3 mx-md-0">
+            <div class="card-header bg-gradient-secondary text-white py-3 px-4 border-0">
+                <div class="d-flex align-items-center">
+                    <div class="icon-container me-3">
+                        <i class="bi bi-key fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Ubah Password</h5>
+                        <p class="mb-0 opacity-75 small">Biarkan kosong untuk mempertahankan password saat ini</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4 p-lg-5">
+                <div class="row g-4">
+                    <!-- Password -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-lock-fill me-1 text-primary"></i>Password Baru
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                {{ form.password1 }}
+                                <button class="btn btn-outline-secondary toggle-password" 
+                                        type="button" 
+                                        data-target="{{ form.password1.id_for_label }}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password1.errors %}
+                            <div class="error-feedback">
+                                {{ form.password1.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint password-hint">
+                                {{ form.password1.help_text|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Password confirmation -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label fw-medium mb-2">
+                                <i class="bi bi-key-fill me-1 text-primary"></i>Konfirmasi Password
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                {{ form.password2 }}
+                                <button class="btn btn-outline-secondary toggle-password" 
+                                        type="button" 
+                                        data-target="{{ form.password2.id_for_label }}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password2.errors %}
+                            <div class="error-feedback">
+                                {{ form.password2.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                            <div class="form-hint">
+                                {{ form.password2.help_text }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Hidden password fields when admin is editing -->
+        <div style="display:none">
+            {{ form.password1 }}
+            {{ form.password2 }}
+        </div>
+        {% endif %}
+        
+        <!-- Action Buttons - Sticky bottom bar -->
+        <div class="action-bar">
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="button" onclick="history.back()" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>Kembali
+                </button>
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    <i class="bi bi-save me-2"></i>Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Card styling */
+    .card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        margin-left: 0.75rem;
+        margin-right: 0.75rem;
+    }
+    
+    @media (min-width: 768px) {
+        .card {
+            margin-left: 0;
+            margin-right: 0;
+        }
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+    }
+    
+    /* Gradients */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4361ee, #3a7bd5);
+    }
+    
+    .bg-gradient-secondary {
+        background: linear-gradient(135deg, #4361ee, #3a7bd5);
+        opacity: 0.9;
+    }
+    
+    /* Icon container */
+    .icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Form styling */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-control,
+    .form-select {
+        padding: 0.7rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+    
+    .input-group .form-control,
+    .input-group .form-select {
+        border-radius: 0 0.375rem 0.375rem 0 !important;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+        transition: all 0.2s ease;
+        border-radius: 0.375rem 0 0 0.375rem;
+        padding: 0.7rem 1rem;
+    }
+    
+    /* Focus styles */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        z-index: 1;
+    }
+    
+    .form-control:focus + .input-group-text {
+        border-color: #86b7fe;
+    }
+    
+    /* Form check styling */
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0.25rem;
+        cursor: pointer;
+    }
+    
+    .form-check-input:checked {
+        background-color: #4361ee;
+        border-color: #4361ee;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        padding-left: 0.5rem;
+    }
+    
+    /* Form feedback */
+    .error-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-hint {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    /* Password hint specially formatted */
+    .password-hint ul {
+        margin-top: 0.5rem;
+        padding-left: 1.25rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Status switch styling */
+    .status-switch {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+    
+    /* Toggle password button */
+    .toggle-password {
+        z-index: 5;
+        background-color: #fff;
+        border-color: #ced4da;
+        border-left: none;
+        cursor: pointer;
+    }
+    
+    .toggle-password:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .toggle-password:focus {
+        box-shadow: none;
+        border-color: #86b7fe;
+    }
+    
+    /* Action bar at bottom */
+    .action-bar {
+        position: sticky;
+        bottom: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
+        margin: 0 0.75rem;
+        z-index: 10;
+    }
+    
+    @media (min-width: 768px) {
+        .action-bar {
+            margin: 0;
+        }
+        
+        /* Larger buttons on desktop */
+        .action-bar .btn {
+            min-width: 180px;
+        }
+    }
+    
+    /* Validation styles */
+    .is-valid {
+        border-color: #198754 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    /* Profile styling */
+    .profile-avatar-large {
+        width: 140px;
+        height: 140px;
+        font-size: 3rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .info-stat {
+        padding: 0.75rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        height: 100%;
+    }
+    
+    .info-label {
+        color: #6c757d;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-value {
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Email validation with basic pattern
+    const emailInput = document.getElementById('{{ form.email.id_for_label }}');
+    
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const email = this.value;
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailPattern.test(email)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (email) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+        
+        // Run validation on load
+        if (emailInput.value) {
+            const event = new Event('input');
+            emailInput.dispatchEvent(event);
+        }
+    }
+    
+    // Add toggle password functionality with animation
+    document.querySelectorAll('.toggle-password').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            // Toggle password visibility
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+                
+                // Add a highlight effect
+                this.classList.add('btn-primary');
+                this.classList.remove('btn-outline-secondary');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-outline-secondary');
+                }, 2000);
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-outline-secondary');
+            }
+        });
+    });
+    
+    // Status toggle visual feedback
+    const statusToggle = document.getElementById('{{ form.is_active.id_for_label }}');
+    const activeStatusBadge = document.querySelector('.active-status');
+    
+    if (statusToggle && activeStatusBadge) {
+        statusToggle.addEventListener('change', function() {
+            if (this.checked) {
+                activeStatusBadge.innerHTML = '<span class="badge bg-success">Aktif</span>';
+            } else {
+                activeStatusBadge.innerHTML = '<span class="badge bg-danger">Nonaktif</span>';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

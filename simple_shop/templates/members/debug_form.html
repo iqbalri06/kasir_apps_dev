@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Form Pencarian</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+        .card { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        input { padding: 8px; width: 200px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Form Pencarian Member</h1>
+    
+    <div class="card">
+        <h3>1. Form HTML Langsung</h3>
+        <p>Form ini langsung mengirim ke endpoint API tanpa JavaScript:</p>
+        <form action="/members/search/api/" method="GET" target="_blank">
+            <input type="text" name="phone" placeholder="Nomor telepon">
+            <button type="submit">Cari (Direct)</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <h3>2. Test Dengan Fetch API</h3>
+        <p>Test API dengan JavaScript Fetch:</p>
+        <input type="text" id="fetchPhone" placeholder="Nomor telepon">
+        <button onclick="testFetch()">Cari (Fetch)</button>
+        <pre id="fetchResult">Hasil akan muncul di sini...</pre>
+    </div>
+    
+    <div class="card">
+        <h3>3. Test Dengan XMLHttpRequest</h3>
+        <p>Test API dengan teknik lama XMLHttpRequest:</p>
+        <input type="text" id="xhrPhone" placeholder="Nomor telepon">
+        <button onclick="testXHR()">Cari (XHR)</button>
+        <pre id="xhrResult">Hasil akan muncul di sini...</pre>
+    </div>
+    
+    <div class="card">
+        <h3>4. Network Diagnostics</h3>
+        <button onclick="testConnection()">Test Koneksi</button>
+        <pre id="diagnosticResult">Klik tombol untuk menjalankan tes...</pre>
+    </div>
+    
+    <script>
+        // Test dengan Fetch API
+        function testFetch() {
+            const phone = document.getElementById('fetchPhone').value.trim();
+            const result = document.getElementById('fetchResult');
+            
+            result.textContent = "Loading...";
+            
+            fetch(`/members/search/api/?phone=${encodeURIComponent(phone)}`)
+                .then(response => {
+                    result.textContent += `\nStatus: ${response.status} ${response.statusText}`;
+                    return response.json();
+                })
+                .then(data => {
+                    result.textContent = `Status: ${data.success ? 'Success' : 'Failed'}\n`;
+                    result.textContent += JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    result.textContent = `Error: ${error.message}\n${error.stack}`;
+                });
+        }
+        
+        // Test dengan XMLHttpRequest
+        function testXHR() {
+            const phone = document.getElementById('xhrPhone').value.trim();
+            const result = document.getElementById('xhrResult');
+            
+            result.textContent = "Loading...";
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `/members/search/api/?phone=${encodeURIComponent(phone)}`);
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    result.textContent = `Status: ${data.success ? 'Success' : 'Failed'}\n`;
+                    result.textContent += JSON.stringify(data, null, 2);
+                } else {
+                    result.textContent = `Error: ${xhr.status}\n${xhr.responseText}`;
+                }
+            };
+            
+            xhr.onerror = function() {
+                result.textContent = `Network Error: ${xhr.statusText}`;
+            };
+            
+            xhr.send();
+        }
+        
+        // Test koneksi jaringan
+        function testConnection() {
+            const result = document.getElementById('diagnosticResult');
+            result.textContent = "Running tests...\n";
+            
+            // Test 1: Simple fetch to API endpoint
+            result.textContent += "\n1. Testing API endpoint...";
+            fetch('/members/debug/')
+                .then(response => response.json())
+                .then(data => {
+                    result.textContent += `\n   Status: ${data.success ? 'OK' : 'Failed'}\n   Message: ${data.message}`;
+                })
+                .catch(error => {
+                    result.textContent += `\n   Error: ${error.message}`;
+                })
+                .finally(() => {
+                    // Test 2: Check browser capabilities
+                    result.textContent += "\n\n2. Browser capabilities:";
+                    result.textContent += `\n   fetch API: ${typeof fetch !== 'undefined' ? 'Available' : 'Not available'}`;
+                    result.textContent += `\n   XMLHttpRequest: ${typeof XMLHttpRequest !== 'undefined' ? 'Available' : 'Not available'}`;
+                    result.textContent += `\n   JSON: ${typeof JSON !== 'undefined' ? 'Available' : 'Not available'}`;
+                    
+                    // Test 3: Check URL access
+                    result.textContent += "\n\n3. Testing URLs:";
+                    fetch('/members/')
+                        .then(response => {
+                            result.textContent += `\n   /members/ - Status: ${response.status} ${response.statusText}`;
+                        })
+                        .catch(error => {
+                            result.textContent += `\n   /members/ - Error: ${error.message}`;
+                        });
+                });
+        }
+    </script>
+</body>
+</html>

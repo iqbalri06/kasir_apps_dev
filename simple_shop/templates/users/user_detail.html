@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Pengguna - {{ user_detail.get_full_name|default:user_detail.username }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-3">
+            <button onclick="history.back()" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </button>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if user_detail.profile_picture %}
+                            <img src="{{ user_detail.profile_picture.url }}" alt="Profile Picture" 
+                                 class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 150px; height: 150px;">
+                                <span class="display-4 text-white">{{ user_detail.username.0|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h4 class="card-title mb-1">{{ user_detail.get_full_name|default:user_detail.username }}</h4>
+                    
+                    {% if user_detail.role %}
+                    <p class="text-muted">{{ user_detail.role }}</p>
+                    {% endif %}
+                    
+                    {% if user.is_superuser or user == user_detail %}
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'simple_shop:user_update' uuid=user_detail.pk %}" class="btn btn-primary">
+                                <i class="bi bi-pencil-square me-2"></i>Edit User
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Informasi Pengguna</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="small text-muted">Username</label>
+                                <p class="mb-0">{{ user_detail.username }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small text-muted">Email</label>
+                                <p class="mb-0">{{ user_detail.email|default:"-" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small text-muted">Nama Lengkap</label>
+                                <p class="mb-0">{{ user_detail.get_full_name|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="small text-muted">Status</label>
+                                <p class="mb-0">
+                                    {% if user_detail.is_active %}
+                                        <span class="badge bg-success">Aktif</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Tidak Aktif</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small text-muted">Tanggal Bergabung</label>
+                                <p class="mb-0">{{ user_detail.date_joined|date:"d F Y" }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small text-muted">Login Terakhir</label>
+                                <p class="mb-0">{{ user_detail.last_login|date:"d F Y H:i"|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_superuser %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Hak Akses</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="small text-muted">Status Admin</label>
+                                <p class="mb-0">
+                                    {% if user_detail.is_superuser %}
+                                        <span class="badge bg-danger">Superuser</span>
+                                    {% elif user_detail.is_staff %}
+                                        <span class="badge bg-warning">Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">User Biasa</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load currency %}
+
+{% block title %}Daftar Penjualan - Simple Shop{% endblock %}
+
+{% block path_info %}
+<div class="mb-4">
+    <h2 class="mb-2">Laporan Penjualan</h2>
+    <p class="text-muted mb-3">Lihat dan kelola semua transaksi penjualan</p>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'simple_shop:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Penjualan</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block page_header %}
+<h4 class="text-primary fw-bold mb-0">
+    <i class="bi bi-receipt me-2"></i>Penjualan
+</h4>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Daftar Penjualan</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Removed the summary stats cards that were showing zeros -->
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="text-primary fw-bold m-0">
+                                <i class="bi bi-receipt-cutoff me-2"></i>Daftar Penjualan
+                            </h5>
+                        </div>
+                        <div class="col-auto d-flex gap-2">
+                            <form class="d-flex" method="get">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="search" 
+                                           name="search" 
+                                           class="form-control bg-light border-start-0" 
+                                           placeholder="Cari transaksi..."
+                                           value="{{ search_query }}"
+                                           style="height: 40px;">
+                                    <button class="btn btn-primary" type="submit" style="height: 40px;">
+                                        Cari
+                                    </button>
+                                </div>
+                            </form>
+                            <button class="btn btn-success d-flex align-items-center justify-content-center" 
+                                    style="height: 40px; padding: 0 15px;" 
+                                    type="button" 
+                                    title="Download laporan penjualan dalam format Excel">
+                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}export=excel" 
+                                   class="text-decoration-none text-white d-flex align-items-center">
+                                    <i class="bi bi-file-excel me-2"></i>Export Laporan Excel
+                                </a>
+                            </button>
+                            <button class="btn btn-primary d-flex align-items-center justify-content-center" style="height: 40px; padding: 0 15px;" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                                <i class="bi bi-funnel me-1"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="collapse mt-3" id="filterCollapse">
+                        <form method="get" class="row g-3 bg-light p-3 rounded border">
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Mulai</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Selesai</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Terapkan Filter</button>
+                                <a href="{% url 'simple_shop:sales' %}" class="btn btn-outline-secondary">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-dark">
+                                <tr>
+                                    <th class="px-4 py-3">Tanggal</th>
+                                    <th class="py-3">No. Transaksi</th>
+                                    <th class="py-3">Pelanggan</th>
+                                    <th class="text-end py-3">Total</th>
+                                    <th class="text-center py-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales %}
+                                <tr>
+                                    <td class="px-4">
+                                        <span class="fw-medium">{{ sale.created_at|date:"d/m/Y" }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ sale.created_at|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-medium px-3 py-2">
+                                            {{ sale.transaction_number }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if sale.member %}
+                                                <div class="avatar avatar-sm bg-primary-subtle text-primary me-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <span class="fw-medium">{{ sale.member.name|slice:":1"|upper }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="d-block fw-medium text-truncate" style="max-width: 180px;">{{ sale.member.name }}</span>
+                                                    <small class="text-muted d-block">{{ sale.member.phone }}</small>
+                                                </div>
+                                            {% else %}
+                                                <div class="avatar avatar-sm bg-light text-secondary me-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-person"></i>
+                                                </div>
+                                                <span class="text-muted">Non-member</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold">{{ sale.total_price|rupiah }}</td>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                Opsi
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <a href="{% url 'simple_shop:sale_detail' sale.id %}" class="dropdown-item">
+                                                        <i class="bi bi-eye me-2 text-primary"></i>Detail
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'simple_shop:print_receipt' sale.id %}" class="dropdown-item" target="_blank">
+                                                        <i class="bi bi-printer me-2 text-secondary"></i>Cetak Struk
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" alt="No data" class="mb-3" width="80">
+                                        <h5 class="text-muted">Belum ada data penjualan</h5>
+                                        <p class="text-muted">Transaksi yang berhasil akan muncul di sini</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if sales.has_other_pages %}
+                <div class="card-footer bg-white py-3">
+                    <nav>
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if sales.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ sales.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link"><i class="bi bi-chevron-left"></i></a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in sales.paginator.page_range %}
+                                {% if sales.number == i %}
+                                    <li class="page-item active">
+                                        <a class="page-link">{{ i }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if sales.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ sales.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link"><i class="bi bi-chevron-right"></i></a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Keep the existing modal -->
+<div class="modal fade" id="registerMemberModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Daftar Member Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerMemberForm">
+                    <div class="mb-3">
+                        <label class="form-label">No. Telepon</label>
+                        <input type="text" class="form-control" id="memberPhone" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Member</label>
+                        <input type="text" class="form-control" id="memberName" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="saveMember">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    // Handle filter collapse state
+    document.addEventListener('DOMContentLoaded', function() {
+        // If any filter is applied, open the collapse
+        {% if date_from or date_to or payment_method %}
+            var filterCollapse = new bootstrap.Collapse(document.getElementById('filterCollapse'), {
+                toggle: true
+            });
+        {% endif %}
+    });
+    
+    // Add this to your existing JavaScript
+    function showMemberRegistration(phone) {
+        $('#memberPhone').val(phone);
+        $('#registerMemberModal').modal('show');
+    }
+
+    $('#saveMember').click(function() {
+        const phone = $('#memberPhone').val();
+        const name = $('#memberName').val();
+        
+        if (!name) {
+            alert('Nama member harus diisi');
+            return;
+        }
+        
+        $.get(`{% url 'simple_shop:search_member' %}?phone=${phone}&name=${name}`, function(response) {
+            if (response.success) {
+                $('#registerMemberModal').modal('hide');
+                // Update the member info in your form/table
+                location.reload();  // Or update the UI without reload
+            } else {
+                alert(response.message);
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

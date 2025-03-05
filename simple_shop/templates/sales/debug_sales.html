@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Debug Sales Data</h1>
+    
+    <h3>Raw Sales Data:</h3>
+    <pre>{{ sales_debug|safe }}</pre>
+    
+    <h3>Context Variables:</h3>
+    <ul>
+        <li>Number of sales: {{ sales.count }}</li>
+        <li>Has pages: {{ sales.has_other_pages }}</li>
+        <li>Current page: {{ sales.number }}</li>
+        <li>Page range: {{ sales.paginator.page_range|join:", " }}</li>
+        <li>Search query: "{{ search_query }}"</li>
+        <li>Date from: {{ date_from|default:"Not set" }}</li>
+        <li>Date to: {{ date_to|default:"Not set" }}</li>
+        <li>Payment method: {{ payment_method|default:"Not set" }}</li>
+    </ul>
+    
+    <h3>Individual Sales:</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Created At</th>
+                <th>Total</th>
+                <th>User</th>
+                <th>Member</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ sale.id }}</td>
+                <td>{{ sale.created_at }}</td>
+                <td>{{ sale.total_price }}</td>
+                <td>{{ sale.user.username }}</td>
+                <td>{{ sale.member.name|default:"None" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No sales found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'simple_shop:sales' %}" class="btn btn-primary">Back to Sales</a>
+</div>
+{% endblock %}

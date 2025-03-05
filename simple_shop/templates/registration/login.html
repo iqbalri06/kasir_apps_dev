@@ -1,0 +1,441 @@
+{% extends 'registration/base_auth.html' %}
+
+{% block title %}Masuk - IQMart{% endblock %}
+
+{% block content %}
+<style>
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .input-group:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+
+    .input-group {
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+    }
+
+    .btn-primary:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 120%;
+        height: 120%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%) scale(0);
+        border-radius: 50%;
+        opacity: 0;
+        transition: 0.5s;
+    }
+
+    .btn-primary:active:after {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 15px 60px!important;
+    }
+
+    .line-separator {
+        animation: expandWidth 1s ease-out;
+    }
+
+    @keyframes expandWidth {
+        from { width: 0; }
+        to { width: 60px; }
+    }
+
+    .form-control {
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .input-group-text {
+        border-radius: 10px;
+        width: 50px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .form-floating > label {
+        padding-left: 50px;
+    }
+
+    .custom-input {
+        border-radius: 15px !important;
+        background-color: #f8f9fa !important;
+        border: 2px solid transparent !important;
+    }
+
+    .custom-input:focus {
+        border-color: #0d6efd !important;
+        box-shadow: none !important;
+    }
+
+    .brand-logo {
+        width: 80px;
+        height: 80px;
+        background: #0d6efd;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto;
+        transform: rotate(45deg);
+        margin-bottom: 1.5rem;
+    }
+
+    .brand-logo i {
+        transform: rotate(-45deg);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .custom-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+    }
+
+    .form-control, .input-group-text {
+        border: none !important;
+        background: #f8f9fa !important;
+    }
+
+    .input-group {
+        background: #f8f9fa;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .input-group-text {
+        border-right: 2px solid #fff !important;
+        padding: 12px 15px;
+    }
+
+    .form-control:focus {
+        box-shadow: none !important;
+        background: #fff !important;
+    }
+
+    .brand-logo {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(45deg, #0d6efd, #0099ff);
+        box-shadow: 0 8px 16px rgba(13, 110, 253, 0.2);
+        transform: rotate(45deg);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: rotate(45deg) translateY(0px); }
+        50% { transform: rotate(45deg) translateY(-10px); }
+        100% { transform: rotate(45deg) translateY(0px); }
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #0d6efd, #0099ff);
+        border: none;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+    }
+
+    .form-label {
+        color: #495057;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Add new alert styles */
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        position: relative;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #ff4b4b15 0%, #ff4b4b10 100%);
+        border-left: 4px solid #ff4b4b;
+        color: #dc3545;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #28a74515 0%, #28a74510 100%);
+        border-left: 4px solid #28a745;
+        color: #28a745;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #ffc10715 0%, #ffc10710 100%);
+        border-left: 4px solid #ffc107;
+        color: #856404;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #17a2b815 0%, #17a2b810 100%);
+        border-left: 4px solid #17a2b8;
+        color: #17a2b8;
+    }
+
+    .alert i {
+        margin-right: 10px;
+        font-size: 1.1em;
+    }
+
+    .btn-close {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        opacity: 0.5;
+        transition: opacity 0.3s;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .shake {
+        animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* Add fade out animation */
+    .alert.fade-out {
+        animation: fadeOut 0.5s ease forwards;
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+</style>
+
+<div class="min-vh-100 d-flex align-items-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-md-8 col-lg-5">
+                <div class="text-center mb-4 fade-in-up">
+                    <div class="brand-logo mx-auto mb-4">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h2 class="mb-3">Login to IQMart</h2>
+                    <p class="text-muted mb-4">Welcome back! Please login to your account.</p>
+                </div>
+                
+                {% if error_message %}
+                <div class="fade-in-up">
+                    <div class="alert alert-{% if error_type == 'account-disabled' %}danger{% elif error_type == 'invalid-credentials' %}warning{% elif error_type == 'incomplete' %}info{% else %}danger{% endif %} alert-dismissible fade show auto-dismiss" role="alert">
+                        {% if error_type == 'account-disabled' %}
+                            <i class="fas fa-user-lock"></i>
+                        {% elif error_type == 'invalid-credentials' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif error_type == 'incomplete' %}
+                            <i class="fas fa-info-circle"></i>
+                        {% else %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% endif %}
+                        {{ error_message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="card custom-card shadow-lg fade-in-up">
+                    <div class="card-body p-4 p-md-5">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Username Field -->
+                            <div class="mb-4">
+                                <label for="username" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user text-primary"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="username" 
+                                           id="username" 
+                                           class="form-control ps-2" 
+                                           placeholder="Enter your username" 
+                                           required
+                                           value="{{ username|default:'' }}">
+                                </div>
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock text-primary"></i>
+                                    </span>
+                                    <input type="password" name="password" id="password" class="form-control ps-2" placeholder="Enter your password" required>
+                                    <button class="input-group-text bg-transparent border-start-0" type="button" id="togglePassword">
+                                        <i class="fas fa-eye-slash text-muted"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                    <label class="form-check-label text-muted" for="rememberMe">Remember me</label>
+                                </div>
+                                <a href="{% url 'simple_shop:forgot_password' %}" class="text-primary text-decoration-none">Forgot password?</a>
+                            </div>
+                            
+                            <!-- Login Button -->
+                            <div class="mb-4">
+                                <button type="submit" class="btn btn-primary w-100 py-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="text-center text-muted mt-4 small fade-in-up">
+                    <p>&copy; 2023 IQMart. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto dismiss alerts after 3 seconds
+    const alerts = document.querySelectorAll('.alert.auto-dismiss');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.classList.add('fade-out');
+            setTimeout(() => {
+                const parent = alert.closest('.fade-in-up');
+                if (parent) {
+                    parent.remove();
+                } else {
+                    alert.remove();
+                }
+            }, 500);
+        }, 3000);
+    });
+
+    // Password visibility toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        
+        // Toggle icon
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Animation on form submission
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const loginBtn = this.querySelector('button[type="submit"]');
+        loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Signing in...';
+        loginBtn.disabled = true;
+    });
+    
+    // Add focus effects to input groups
+    const inputGroups = document.querySelectorAll('.input-group');
+    inputGroups.forEach(group => {
+        const input = group.querySelector('.form-control');
+        const icon = group.querySelector('.input-group-text .fas');
+        
+        input.addEventListener('focus', () => {
+            group.classList.add('shadow-sm');
+            group.style.borderColor = '#0d6efd';
+            if (icon) icon.classList.add('text-primary');
+        });
+        
+        input.addEventListener('blur', () => {
+            group.classList.remove('shadow-sm');
+            group.style.borderColor = '';
+            if (icon && !input.value) icon.classList.remove('text-primary');
+        });
+    });
+
+    // Clear messages when form is submitted
+    form.addEventListener('submit', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
+    });
+});
+</script>
+{% endblock %}

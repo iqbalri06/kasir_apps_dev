@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load currency %}
+
+{% block title %}Detail Transaksi - Simple Shop{% endblock %}
+
+{% block path_info %}
+<div class="mb-4">
+    <h2 class="mb-2">Detail Transaksi</h2>
+    <p class="text-muted mb-3">No. Transaksi: {{ sale.transaction_number }}</p>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'simple_shop:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'simple_shop:sales' %}">Penjualan</a></li>
+            <li class="breadcrumb-item active">Detail</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="text-primary mb-0">
+                    <i class="bi bi-receipt me-2"></i>Detail Transaksi
+                </h4>
+                <div class="d-flex gap-2">
+                    <!-- Updated back button logic -->
+                    {% if request.user.role.name == 'Admin' %}
+                        <a href="{% url 'simple_shop:sales' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Kembali
+                        </a>
+                    {% else %}
+                        <a href="{% url 'simple_shop:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Kembali ke Dashboard
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'simple_shop:print_receipt' sale.id %}" class="btn btn-primary">
+                        <i class="bi bi-printer me-1"></i>Cetak
+                    </a>
+                </div>
+            </div>
+
+            <!-- Invoice Details Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">No. Transaksi: {{ sale.transaction_number }}</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-{{ sale.get_status_color }} px-3 py-2">
+                                {{ sale.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Transaction Info -->
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <h6 class="text-primary mb-3">Informasi Transaksi</h6>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4">Tanggal</dt>
+                                    <dd class="col-sm-8">{{ sale.created_at|date:"d M Y H:i" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Kasir</dt>
+                                    <dd class="col-sm-8">{{ sale.user.get_full_name|default:sale.user.username }}</dd>
+                                    
+                                    {% if sale.customer %}
+                                    <dt class="col-sm-4">Customer</dt>
+                                    <dd class="col-sm-8">{{ sale.customer.get_full_name }}</dd>
+                                    {% endif %}
+
+                                    {% if sale.points_used > 0 %}
+                                    <dt class="col-sm-4">Poin Digunakan</dt>
+                                    <dd class="col-sm-8 text-danger">-{{ sale.points_used }} poin</dd>
+                                    {% endif %}
+
+                                    {% if sale.points_earned > 0 %}
+                                    <dt class="col-sm-4">Poin Didapat</dt>
+                                    <dd class="col-sm-8 text-success">+{{ sale.points_earned }} poin</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 50%">Produk</th>
+                                            <th class="text-end" style="width: 20%">Harga</th>
+                                            <th class="text-end" style="width: 10%">Jumlah</th>
+                                            <th class="text-end" style="width: 20%">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for detail in details %}
+                                        <tr>
+                                            <td>{{ detail.product.name }}</td>
+                                            <td class="text-end">{{ detail.price|rupiah }}</td>
+                                            <td class="text-end">{{ detail.quantity }}</td>
+                                            <td class="text-end">{{ detail.subtotal|rupiah }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold">Total Harga:</td>
+                                            <td class="text-end fw-bold">{{ sale.total_price|add:sale.discount_amount|rupiah }}</td>
+                                        </tr>
+                                        {% if sale.points_used > 0 %}
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold text-danger">Potongan:</td>
+                                            <td class="text-end fw-bold text-danger">-{{ sale.discount_amount|rupiah }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold">Total Setelah Potongan:</td>
+                                            <td class="text-end fw-bold">{{ sale.total_price|rupiah }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

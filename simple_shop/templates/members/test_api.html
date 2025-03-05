@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Member API</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .result { background: #f5f5f5; border: 1px solid #ddd; padding: 10px; margin-top: 10px; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        input { padding: 8px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Test Member API</h1>
+    
+    <h2>1. Test Search API</h2>
+    <div>
+        <input type="text" id="searchInput" placeholder="Phone number">
+        <button onclick="testSearch()">Search</button>
+        <div class="result" id="searchResult">Results will appear here</div>
+    </div>
+    
+    <h2>2. Test Register API</h2>
+    <div>
+        <input type="text" id="regPhone" placeholder="Phone number">
+        <input type="text" id="regName" placeholder="Name">
+        <button onclick="testRegister()">Register</button>
+        <div class="result" id="registerResult">Results will appear here</div>
+    </div>
+    
+    <script>
+        function testSearch() {
+            const phone = document.getElementById('searchInput').value;
+            const resultElem = document.getElementById('searchResult');
+            
+            resultElem.innerText = "Loading...";
+            
+            fetch(`/members/search/api/?phone=${encodeURIComponent(phone)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultElem.innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    resultElem.innerText = "Error: " + error.message;
+                });
+        }
+        
+        function testRegister() {
+            const phone = document.getElementById('regPhone').value;
+            const name = document.getElementById('regName').value;
+            const resultElem = document.getElementById('registerResult');
+            
+            resultElem.innerText = "Loading...";
+            
+            fetch('/members/register/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    name: name
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    resultElem.innerText = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    resultElem.innerText = "Error: " + error.message;
+                });
+        }
+    </script>
+</body>
+</html>

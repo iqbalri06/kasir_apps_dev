@@ -1,0 +1,21 @@
+{% load currency %}
+
+{% for item in cart_items %}
+<div class="cart-item">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="mb-1">{{ item.product.name }}</h6>
+            <small class="text-muted">
+                {{ item.product.price|rupiah }} x {{ item.quantity }}
+            </small>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="me-3 fw-bold">{{ item.total_price|rupiah }}</span>
+            <button onclick="removeFromCart('{{ item.id }}')" 
+                    class="btn btn-outline-danger btn-sm rounded-circle">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endfor %}

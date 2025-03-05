@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load currency %}
+
+{% block title %}Dashboard Admin - Simple Shop{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block header_actions %}
+<!-- Empty header actions since we're moving the greeting to the clock card -->
+{% endblock %}
+
+{% block content %}
+<!-- Combined Clock Card with Greeting -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm time-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="clock-analog">
+                            <canvas id="analogClock" width="100" height="100"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-column">
+                            <div class="digital-time mb-1">
+                                <span id="timeIcon" class="me-2"></span>
+                                <span id="digitalClock" class="fw-bold"></span>
+                            </div>
+                            <div class="date">
+                                <i class="bi bi-calendar3 me-2"></i>
+                                <span id="indonesianDate"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="user-greeting">
+                            <div class="greeting-content">
+                                <div class="greeting-text">
+                                    <h4 id="greetingMessage" class="mb-1"></h4>
+                                    <p class="text-muted mb-0">{{ user.get_full_name|default:user.username }}</p>
+                                </div>
+                                <div class="greeting-icon" id="greetingIcon"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Summary Cards with Real Data -->
+<div class="row g-4 mb-4">
+    <!-- Daily Sales with Real Percentage -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-primary bg-opacity-10">
+                    <i class="bi bi-cash text-primary"></i>
+                </div>
+                <h6 class="stat-label">Penjualan Hari Ini</h6>
+                <h4 class="stat-value">Rp {{ today_sales|floatformat:0|intcomma }}</h4>
+                <div class="stat-change {% if daily_sales_change >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="bi {% if daily_sales_change >= 0 %}bi-graph-up-arrow{% else %}bi-graph-down-arrow{% endif %}"></i> 
+                    <span>{{ daily_sales_change|floatformat:1 }}% dari kemarin</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Sales with Real Percentage -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-success bg-opacity-10">
+                    <i class="bi bi-cash-stack text-success"></i>
+                </div>
+                <h6 class="stat-label">Penjualan Bulan Ini</h6>
+                <h4 class="stat-value">Rp {{ total_sales|floatformat:0|intcomma }}</h4>
+                <div class="stat-change {% if monthly_sales_change >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="bi {% if monthly_sales_change >= 0 %}bi-graph-up-arrow{% else %}bi-graph-down-arrow{% endif %}"></i> 
+                    <span>{{ monthly_sales_change|floatformat:1 }}% dari bulan lalu</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Daily Transactions with Real Percentage -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-warning bg-opacity-10">
+                    <i class="bi bi-receipt text-warning"></i>
+                </div>
+                <h6 class="stat-label">Transaksi Hari Ini</h6>
+                <h4 class="stat-value">{{ daily_transactions_count }}</h4>
+                <div class="stat-change {% if daily_transactions_change >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="bi {% if daily_transactions_change >= 0 %}bi-graph-up-arrow{% else %}bi-graph-down-arrow{% endif %}"></i> 
+                    <span>{{ daily_transactions_change|floatformat:1 }}% dari kemarin</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Members Count with Real Percentage -->
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon bg-info bg-opacity-10">
+                    <i class="bi bi-people text-info"></i>
+                </div>
+                <h6 class="stat-label">Total Member</h6>
+                <h4 class="stat-value">{{ members_count|default:"0" }}</h4>
+                <div class="stat-change {% if members_count_change >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="bi {% if members_count_change >= 0 %}bi-graph-up-arrow{% else %}bi-graph-down-arrow{% endif %}"></i> 
+                    <span>{{ members_count_change|floatformat:1 }}% dari minggu lalu</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section with Simplified Headers -->
+<div class="row g-4">
+    <!-- Daily Sales Chart - Removed buttons -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="card-title mb-0 fw-bold">Penjualan Harian (7 Hari Terakhir)</h5>
+                <!-- Removed chart action buttons -->
+            </div>
+            <div class="card-body">
+                <canvas id="dailySalesChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Share Chart - Removed button -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 fw-bold">Persentase Produk Terjual</h5>
+                <!-- Removed three dots button -->
+            </div>
+            <div class="card-body">
+                <canvas id="productShareChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Sales Chart - Removed buttons -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 fw-bold">Penjualan Bulanan Tahun {{ today|date:"Y" }}</h5>
+                <!-- Removed profit/sales toggle button group -->
+            </div>
+            <div class="card-body">
+                <canvas id="monthlySalesChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Date and time utility functions
+    const monthsIndo = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    
+    const daysIndo = [
+        'Minggu', 'Senin', 'Selasa', 'Rabu',
+        'Kamis', 'Jumat', 'Sabtu'
+    ];
+
+    // Set greeting based on time of day
+    function setGreeting() {
+        const now = new Date();
+        const hours = now.getHours();
+        const greeting = document.getElementById('greetingMessage');
+        const greetingIcon = document.getElementById('greetingIcon');
+        
+        let message = '';
+        let icon = '';
+        
+        if (hours >= 0 && hours < 12) {
+            message = 'Selamat Pagi';
+            icon = '<i class="bi bi-brightness-alt-high text-warning"></i>';
+        } else if (hours >= 12 && hours < 15) {
+            message = 'Selamat Siang';
+            icon = '<i class="bi bi-sun text-warning"></i>';
+        } else if (hours >= 15 && hours < 18) {
+            message = 'Selamat Sore';
+            icon = '<i class="bi bi-sunset text-warning"></i>';
+        } else {
+            message = 'Selamat Malam';
+            icon = '<i class="bi bi-moon-stars text-info"></i>';
+        }
+        
+        greeting.textContent = message + ',';
+        greetingIcon.innerHTML = icon;
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        
+        // Update digital clock
+        const digitalClock = document.getElementById('digitalClock');
+        digitalClock.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Update time icon
+        const timeIcon = document.getElementById('timeIcon');
+        if (hours >= 0 && hours < 11) {
+            timeIcon.innerHTML = '<i class="bi bi-sunrise text-warning"></i>';
+        } else if (hours >= 11 && hours < 15) {
+            timeIcon.innerHTML = '<i class="bi bi-sun text-warning"></i>';
+        } else if (hours >= 15 && hours < 18) {
+            timeIcon.innerHTML = '<i class="bi bi-sunset text-warning"></i>';
+        } else {
+            timeIcon.innerHTML = '<i class="bi bi-moon-stars text-info"></i>';
+        }
+        
+        // Update analog clock
+        const canvas = document.getElementById('analogClock');
+        const ctx = canvas.getContext('2d');
+        const radius = canvas.height / 2;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw clock face
+        ctx.beginPath();
+        ctx.arc(radius, radius, radius - 4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fill();
+        ctx.strokeStyle = '#4361ee';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Draw hour markers
+        for (let i = 0; i < 12; i++) {
+            const angle = (i * 30) * Math.PI / 180;
+            const markerRadius = radius - 10;
+            const x1 = radius + Math.sin(angle) * markerRadius;
+            const y1 = radius - Math.cos(angle) * markerRadius;
+            const x2 = radius + Math.sin(angle) * (markerRadius - 5);
+            const y2 = radius - Math.cos(angle) * (markerRadius - 5);
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = '#4361ee';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // Draw clock hands
+        const secondAngle = (seconds * 6) * Math.PI / 180;
+        const minuteAngle = ((minutes + seconds/60) * 6) * Math.PI / 180;
+        const hourAngle = ((hours % 12 + minutes/60) * 30) * Math.PI / 180;
+        
+        // Hour hand
+        drawHand(ctx, hourAngle, radius * 0.5, 4, '#0d6efd');
+        // Minute hand
+        drawHand(ctx, minuteAngle, radius * 0.7, 3, '#0d6efd');
+        // Second hand
+        drawHand(ctx, secondAngle, radius * 0.85, 2, '#dc3545');
+        
+        // Draw center dot
+        ctx.beginPath();
+        ctx.arc(radius, radius, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#4361ee';
+        ctx.fill();
+        
+        // Update Indonesian date
+        const day = daysIndo[now.getDay()];
+        const date = now.getDate();
+        const month = monthsIndo[now.getMonth()];
+        const year = now.getFullYear();
+        document.getElementById('indonesianDate').textContent = 
+            `${day}, ${date} ${month} ${year}`;
+    }
+
+    function drawHand(ctx, angle, length, width, color) {
+        const centerX = ctx.canvas.width / 2;
+        const centerY = ctx.canvas.height / 2;
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = color;
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(
+            centerX + Math.sin(angle) * length,
+            centerY - Math.cos(angle) * length
+        );
+        ctx.stroke();
+    }
+
+    // Run once on page load
+    setGreeting();
+    updateClock();
+    
+    // Update clock every second
+    setInterval(updateClock, 1000);
+
+    // Daily Sales Chart
+    new Chart(document.getElementById('dailySalesChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ daily_labels|safe }},
+            datasets: [{
+                label: 'Penjualan',
+                data: {{ daily_sales_data|safe }},
+                backgroundColor: 'rgba(67, 97, 238, 0.6)',
+                borderColor: 'rgba(67, 97, 238, 1)',
+                borderWidth: 1,
+                borderRadius: 6,
+                maxBarThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#2b2d42',
+                    bodyColor: '#2b2d42',
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false,
+                        borderDash: [5, 5]
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Sales Chart
+    new Chart(document.getElementById('monthlySalesChart'), {
+        type: 'line',
+        data: {
+            labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+            datasets: [{
+                label: 'Total Penjualan',
+                data: {{ monthly_sales_data|safe }},
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                borderColor: 'rgba(67, 97, 238, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: 'rgba(67, 97, 238, 1)',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#2b2d42',
+                    bodyColor: '#2b2d42',
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        borderDash: [5, 5]
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Product Share Chart
+    new Chart(document.getElementById('productShareChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ product_share_labels|safe }},
+            datasets: [{
+                data: {{ product_share_data|safe }},
+                backgroundColor: [
+                    'rgba(67, 97, 238, 0.8)',
+                    'rgba(72, 149, 239, 0.8)',
+                    'rgba(76, 201, 240, 0.8)',
+                    'rgba(114, 9, 183, 0.8)',
+                    'rgba(255, 87, 51, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#2b2d42',
+                    bodyColor: '#2b2d42',
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw + '%';
+                        }
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+</script>
+
+<style>
+    /* Enhanced clock and dashboard styling */
+    .time-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .clock-analog {
+        width: 100px;
+        height: 100px;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        padding: 5px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .digital-time {
+        font-size: 1.8rem;
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    .date {
+        font-size: 0.95rem;
+        color: #6c757d;
+    }
+    
+    /* User greeting styling in clock card */
+    .user-greeting {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-left: 1rem;
+        position: relative;
+    }
+    
+    .user-greeting:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 10%;
+        height: 80%;
+        width: 1px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .greeting-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .greeting-text h4 {
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+    }
+    
+    .greeting-icon {
+        font-size: 2rem;
+        margin-left: 1rem;
+    }
+
+    /* Stat cards styling */
+    .stat-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-change {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .stat-change.positive {
+        color: #198754;
+    }
+    
+    .stat-change.negative {
+        color: #dc3545;
+    }
+
+    /* Greeting card styling */
+    .greeting-card {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.8) 0%, rgba(72, 149, 239, 0.8) 100%);
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+    }
+    
+    .greeting-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .greeting-text h5 {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+    
+    .greeting-icon {
+        font-size: 1.8rem;
+        margin-left: 1rem;
+    }
+
+    /* Chart card styling */
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .chart-actions .btn {
+        display: none;
+    }
+    
+    .btn-group .btn.active {
+        display: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .user-greeting:before {
+            display: none;
+        }
+        
+        .user-greeting {
+            padding: 1rem 0 0 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+    }
+</style>
+{% endblock %}

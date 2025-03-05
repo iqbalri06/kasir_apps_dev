@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kode Verifikasi OTP - IQMart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: #0d6efd;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            color: #ffffff;
+        }
+        
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            color: #555555;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .otp-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .otp-code {
+            font-family: monospace;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: #0d6efd;
+            margin: 0;
+        }
+        
+        .expiry {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 15px;
+        }
+        
+        .warning {
+            background-color: #fff4e5;
+            border-left: 4px solid #ff9900;
+            padding: 12px 15px;
+            margin: 30px 0;
+            font-size: 14px;
+            color: #7d5700;
+            text-align: left;
+            border-radius: 4px;
+        }
+        
+        .help {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>IQMart</h1>
+            <p style="margin-top: 5px;">Pelanggan senang kami bahagia!</p>
+        </div>
+        
+        <div class="content">
+            <h2 class="greeting">Halo,</h2>
+            <p class="message">
+                Anda telah meminta untuk mengatur ulang kata sandi akun IQMart Anda. 
+                Gunakan kode OTP di bawah untuk melanjutkan proses pengaturan ulang kata sandi.
+            </p>
+            
+            <div class="otp-box">
+                <p class="otp-code">{{ otp }}</p>
+                <p class="expiry">Kode ini berlaku selama 15 menit</p>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Perhatian:</strong> Jika Anda tidak meminta pengaturan ulang kata sandi, 
+                silakan abaikan email ini atau hubungi tim dukungan kami jika Anda merasa ada aktivitas 
+                mencurigakan pada akun Anda.
+            </div>
+            
+            <p class="message">
+                Untuk keamanan akun Anda, jangan bagikan kode ini dengan orang lain,
+                termasuk yang mengaku dari IQMart. Tim kami tidak akan pernah meminta kode ini.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ current_year }} IQMart. Seluruh hak cipta dilindungi.</p>
+        </div>
+    </div>
+</body>
+</html>

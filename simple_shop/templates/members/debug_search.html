@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Search</title>
+</head>
+<body>
+    <h1>Debug Search Form</h1>
+    <form action="/members/search/api/" method="GET">
+        <input type="text" name="phone" placeholder="Enter phone number">
+        <button type="submit">Search Directly</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Test AJAX Search</h2>
+    <input type="text" id="test-phone" placeholder="Phone number">
+    <button onclick="testSearch()">Test AJAX Search</button>
+    
+    <pre id="result"></pre>
+    
+    <script>
+        async function testSearch() {
+            const phone = document.getElementById('test-phone').value;
+            const resultElement = document.getElementById('result');
+            resultElement.innerText = 'Loading...';
+            
+            try {
+                const response = await fetch(`/members/search/api/?phone=${encodeURIComponent(phone)}`);
+                const data = await response.json();
+                resultElement.innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElement.innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
