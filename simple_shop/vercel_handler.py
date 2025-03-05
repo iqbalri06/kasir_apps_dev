@@ -1,13 +1,13 @@
-import sys
 import os
-from pathlib import Path
+import sys
 
-# Get the project root directory
+# Get the project root directory (one level up from current file)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+parent_dir = os.path.dirname(current_dir)
 
-# Add project root to Python path
-sys.path.append(project_root)
+# Add both directories to Python path
+sys.path.insert(0, current_dir)
+sys.path.insert(0, parent_dir)
 
 # Configure Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_shop.settings')
@@ -16,8 +16,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_shop.settings')
 import django
 django.setup()
 
-# Now import the WSGI application
-from simple_shop.wsgi import application
+# Import the WSGI application using relative import
+from wsgi import application
 
 # Create the app variable for Vercel
 app = application
