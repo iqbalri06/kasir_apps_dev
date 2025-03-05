@@ -104,8 +104,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Create media directory if it doesn't exist
-os.makedirs(MEDIA_ROOT, exist_ok=True)
+# Only create media directory if not on Vercel
+if not os.environ.get('VERCEL'):
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # QRIS Image Path (using jpg)
 QRIS_IMAGE_PATH = BASE_DIR / 'simple_shop' / 'images' / 'qris.jpg'
@@ -117,25 +118,47 @@ LOGIN_URL = 'simple_shop:login'
 LOGIN_REDIRECT_URL = 'simple_shop:dashboard'
 LOGOUT_REDIRECT_URL = 'simple_shop:login'
 
-# Add Vercel-specific settings
+# Vercel-specific settings
 if os.environ.get('VERCEL'):
+    DEBUG = False
+    ALLOWED_HOSTS = ['*']
+    
+    # Optimize database
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': '/tmp/db.sqlite3',
+            'TIMEOUT': 20,
+            'OPTIONS': {
+                'timeout': 20,
+            }
         }
     }
     
-    # Simplified static file handling
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'simple_shop', 'static'),
+    # Optimize middleware
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
     ]
-
-    # Disable media files in Vercel
-    MEDIA_URL = ''
-    MEDIA_ROOT = ''
+    
+    # Optimize static files
+    STATIC_URL = '/static/'
+    STATIC_ROOT = '/tmp/static'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    
+    # Disable unnecessary apps
+    INSTALLED_APPS = [
+        'simple_shop.apps.SimpleShopConfig',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+    ]
 
 # Disable QRIS image path in Vercel
 if not os.environ.get('VERCEL'):
