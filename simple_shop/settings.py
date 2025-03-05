@@ -10,7 +10,7 @@ SECRET_KEY = 'your-secret-key-here'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'simple_shop.apps.SimpleShopConfig',
@@ -126,8 +126,17 @@ if os.environ.get('VERCEL'):
         }
     }
     
-    # Handle static files
+    # Simplified static file handling
+    STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
+        os.path.join(BASE_DIR, 'simple_shop', 'static'),
     ]
+
+    # Disable media files in Vercel
+    MEDIA_URL = ''
+    MEDIA_ROOT = ''
+
+# Disable QRIS image path in Vercel
+if not os.environ.get('VERCEL'):
+    QRIS_IMAGE_PATH = BASE_DIR / 'simple_shop' / 'images' / 'qris.jpg'
