@@ -2,5 +2,6 @@
 # Make sure qrcode is included
 qrcode>=7.3.1
 Pillow>=9.0.0  # Required by qrcode
-Django>=4.2,<5.0
+Django==4.2.7
 python-dotenv==1.0.0
+whitenoise==6.5.0

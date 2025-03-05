@@ -123,42 +123,38 @@ if os.environ.get('VERCEL'):
     DEBUG = False
     ALLOWED_HOSTS = ['*']
     
-    # Optimize database
+    # Minimal database config
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': '/tmp/db.sqlite3',
-            'TIMEOUT': 20,
-            'OPTIONS': {
-                'timeout': 20,
-            }
         }
     }
     
-    # Optimize middleware
+    # Minimal middleware
     MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
     
-    # Optimize static files
+    # Basic static files
     STATIC_URL = '/static/'
     STATIC_ROOT = '/tmp/static'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     
-    # Disable unnecessary apps
+    # Essential apps only
     INSTALLED_APPS = [
         'simple_shop.apps.SimpleShopConfig',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
-        'django.contrib.messages',
         'django.contrib.staticfiles',
     ]
+
+    # Disable media handling
+    MEDIA_URL = None
+    MEDIA_ROOT = None
 
 # Disable QRIS image path in Vercel
 if not os.environ.get('VERCEL'):
