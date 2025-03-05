@@ -1,4 +1,10 @@
 {
+    "build": {
+        "env": {
+            "DJANGO_SETTINGS_MODULE": "simple_shop.settings"
+        },
+        "cmd": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    },
     "builds": [{
         "src": "simple_shop/vercel_handler.py",
         "use": "@vercel/python"
@@ -9,7 +15,7 @@
     "routes": [
         {
             "src": "/static/(.*)",
-            "dest": "/simple_shop/static/$1"
+            "dest": "/static/$1"
         },
         {
             "src": "/(.*)",
